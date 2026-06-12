@@ -411,7 +411,7 @@
       };
 
       try {
-        const res  = await fetch(`${API_URL}/api/predict`, {
+        const res  = await fetch(`${API_URL}/predict`, {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
           body:    JSON.stringify(payload),
