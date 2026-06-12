@@ -7,8 +7,8 @@ import os
 app = Flask(__name__)
 CORS(app, origins="*")
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "gold_price_model.pkl")
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "gold_price_model.pkl")
 try:
     model = pickle.load(open(MODEL_PATH, "rb"))
     print("Model loaded successfully")
