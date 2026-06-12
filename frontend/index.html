@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gold Price Predictor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header .gold-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      color: #FFD700;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.35);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      margin-top: 24px;
+    }
+
+    .section-label::before,
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      display: block;
+      color: rgba(255,215,0,0.85);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .label-hint {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.72rem;
+      font-weight: normal;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: #fff;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #FFD700;
+      box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
+    }
+
+    input::placeholder { color: rgba(255,255,255,0.25); }
+
+    input.error {
+      border-color: rgba(255, 80, 80, 0.6);
+    }
+
+    .field-error {
+      color: #ff8080;
+      font-size: 0.72rem;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      border: none;
+      border-radius: 12px;
+      color: #1a1a1a;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      margin-top: 24px;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255,215,0,0.35);
+    }
+
+    .btn:active { transform: translateY(0); }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-card {
+      display: none;
+      margin-top: 24px;
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.08));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card .result-label {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .result-card .price {
+      color: #FFD700;
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin: 8px 0 4px;
+    }
+
+    .result-card .unit {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.85rem;
+    }
+
+    .confidence {
+      display: inline-block;
+      margin-top: 12px;
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      color: rgba(255,215,0,0.8);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .error-card {
+      display: none;
+      margin-top: 16px;
+      background: rgba(255,60,60,0.1);
+      border: 1px solid rgba(255,60,60,0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: #ff8080;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .loading { display: none; text-align: center; color: rgba(255,215,0,0.7); margin-top: 16px; font-size: 0.9rem; }
+
+    .features-info {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .feature-badge {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .feature-badge span {
+      display: block;
+      color: rgba(255,215,0,0.7);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <i class="gold-icon">🥇</i>
+      <h1>Gold Price Predictor</h1>
+      <p>Random Forest ML Model &nbsp;·&nbsp; 8 market and time features</p>
+    </div>
+
+    <div class="section-label">Market Indicators</div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>SPX <span class="label-hint">— S&P 500 Index</span></label>
+        <input type="number" id="spx" placeholder="e.g. 4500.00" step="any"/>
+        <div class="field-error" id="err-spx">Required</div>
+      </div>
+      <div class="form-group">
+        <label>USO <span class="label-hint">— Crude Oil ETF</span></label>
+        <input type="number" id="uso" placeholder="e.g. 72.50" step="any"/>
+        <div class="field-error" id="err-uso">Required</div>
+      </div>
+      <div class="form-group">
+        <label>SLV <span class="label-hint">— Silver ETF</span></label>
+        <input type="number" id="slv" placeholder="e.g. 22.30" step="any"/>
+        <div class="field-error" id="err-slv">Required</div>
+      </div>
+      <div class="form-group">
+        <label>EUR/USD <span class="label-hint">— Euro / Dollar</span></label>
+        <input type="number" id="eurusd" placeholder="e.g. 1.0850" step="any"/>
+        <div class="field-error" id="err-eurusd">Required</div>
+      </div>
+    </div>
+
+    <div class="section-label">Time Features</div>
+
+    <div class="grid-4">
+      <div class="form-group">
+        <label>Year</label>
+        <input type="number" id="year" placeholder="YYYY" min="2000" max="2100"/>
+        <div class="field-error" id="err-year">Required</div>
+      </div>
+      <div class="form-group">
+        <label>Month <span class="label-hint">1–12</span></label>
+        <input type="number" id="month" placeholder="MM" min="1" max="12"/>
+        <div class="field-error" id="err-month">1–12</div>
+      </div>
+      <div class="form-group">
+        <label>Day <span class="label-hint">1–31</span></label>
+        <input type="number" id="day" placeholder="DD" min="1" max="31"/>
+        <div class="field-error" id="err-day">1–31</div>
+      </div>
+      <div class="form-group">
+        <label>Quarter <span class="label-hint">1–4</span></label>
+        <input type="number" id="quarter" placeholder="Q" min="1" max="4"/>
+        <div class="field-error" id="err-quarter">1–4</div>
+      </div>
+    </div>
+
+    <button class="btn" id="predictBtn" onclick="predict()">Predict Gold Price</button>
+
+    <div class="loading" id="loading">Running prediction...</div>
+
+    <div class="result-card" id="result">
+      <div class="result-label">Predicted Gold Price (GLD ETF)</div>
+      <div class="price" id="priceValue">—</div>
+      <div class="unit">USD per share</div>
+      <div class="confidence" id="confidenceValue" style="display:none"></div>
+    </div>
+
+    <div class="error-card" id="error"></div>
+
+    <div class="features-info">
+      <div class="feature-badge"><span>Model</span>Random Forest</div>
+      <div class="feature-badge"><span>Tuning</span>GridSearchCV</div>
+      <div class="feature-badge"><span>Features</span>SPX, USO, SLV, EUR/USD</div>
+      <div class="feature-badge"><span>+ Time</span>Year, Month, Day, Quarter</div>
+    </div>
+  </div>
+
+  <script>
+    // Change this to your deployed backend URL
+    const API_URL = "https://393e1f69-378a-4ce0-b648-431e9c5cab0d-00-3fn3u76a1kxng.sisko.replit.dev";
+
+    // Pre-fill today's date
+    const now = new Date();
+    document.getElementById("year").value  = now.getFullYear();
+    document.getElementById("month").value = now.getMonth() + 1;
+    document.getElementById("day").value   = now.getDate();
+    document.getElementById("quarter").value = Math.floor((now.getMonth() + 3) / 3);
+
+    const fields = [
+      { id: "spx",     errId: "err-spx",     label: "SPX",     min: null, max: null },
+      { id: "uso",     errId: "err-uso",     label: "USO",     min: null, max: null },
+      { id: "slv",     errId: "err-slv",     label: "SLV",     min: null, max: null },
+      { id: "eurusd",  errId: "err-eurusd",  label: "EUR/USD", min: null, max: null },
+      { id: "year",    errId: "err-year",    label: "Year",    min: 2000, max: 2100 },
+      { id: "month",   errId: "err-month",   label: "Month",   min: 1,    max: 12  },
+      { id: "day",     errId: "err-day",     label: "Day",     min: 1,    max: 31  },
+      { id: "quarter", errId: "err-quarter", label: "Quarter", min: 1,    max: 4   },
+    ];
+
+    function validate() {
+      let valid = true;
+      for (const f of fields) {
+        const el  = document.getElementById(f.id);
+        const err = document.getElementById(f.errId);
+        const val = parseFloat(el.value);
+        let msg = "";
+        if (el.value === "" || isNaN(val)) {
+          msg = `${f.label} is required`;
+        } else if (f.min !== null && val < f.min) {
+          msg = `Min ${f.min}`;
+        } else if (f.max !== null && val > f.max) {
+          msg = `Max ${f.max}`;
+        }
+        if (msg) {
+          el.classList.add("error");
+          err.textContent = msg;
+          err.style.display = "block";
+          valid = false;
+        } else {
+          el.classList.remove("error");
+          err.style.display = "none";
+        }
+      }
+      return valid;
+    }
+
+    async function predict() {
+      if (!validate()) return;
+
+      const btn        = document.getElementById("predictBtn");
+      const loading    = document.getElementById("loading");
+      const resultCard = document.getElementById("result");
+      const errorCard  = document.getElementById("error");
+      const confBadge  = document.getElementById("confidenceValue");
+
+      btn.disabled = true;
+      loading.style.display = "block";
+      resultCard.style.display = "none";
+      errorCard.style.display  = "none";
+
+      const payload = {
+        SPX:     parseFloat(document.getElementById("spx").value),
+        USO:     parseFloat(document.getElementById("uso").value),
+        SLV:     parseFloat(document.getElementById("slv").value),
+        EUR_USD: parseFloat(document.getElementById("eurusd").value),
+        Year:    parseInt(document.getElementById("year").value),
+        Month:   parseInt(document.getElementById("month").value),
+        Day:     parseInt(document.getElementById("day").value),
+        Quarter: parseInt(document.getElementById("quarter").value),
+      };
+
+      try {
+        const res  = await fetch(`${API_URL}/api/predict`, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Prediction failed");
+
+        document.getElementById("priceValue").textContent = `$${data.prediction.toFixed(2)}`;
+
+        if (data.confidence != null) {
+          confBadge.textContent    = `Model Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+          confBadge.style.display  = "inline-block";
+        } else {
+          confBadge.style.display = "none";
+        }
+
+        resultCard.style.display = "block";
+      } catch (err) {
+        errorCard.textContent    = `Error: ${err.message}`;
+        errorCard.style.display  = "block";
+      } finally {
+        btn.disabled          = false;
+        loading.style.display = "none";
+      }
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Enter") predict();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gold Price Predictor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header .gold-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      color: #FFD700;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      color: rgba(255,215,0,0.85);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .label-hint {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.75rem;
+      font-weight: normal;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #FFD700;
+      box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
+    }
+
+    input::placeholder { color: rgba(255,255,255,0.25); }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      border: none;
+      border-radius: 12px;
+      color: #1a1a1a;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255,215,0,0.35);
+    }
+
+    .btn:active { transform: translateY(0); }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-card {
+      display: none;
+      margin-top: 24px;
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.08));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card .label {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .result-card .price {
+      color: #FFD700;
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin: 8px 0 4px;
+    }
+
+    .result-card .unit {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.85rem;
+    }
+
+    .error-card {
+      display: none;
+      margin-top: 16px;
+      background: rgba(255,60,60,0.1);
+      border: 1px solid rgba(255,60,60,0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: #ff8080;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .loading { display: none; text-align: center; color: rgba(255,215,0,0.7); margin-top: 16px; }
+
+    .features-info {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .feature-badge {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .feature-badge span {
+      display: block;
+      color: rgba(255,215,0,0.7);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <i class="gold-icon">🥇</i>
+      <h1>Gold Price Predictor</h1>
+      <p>Random Forest ML Model &nbsp;·&nbsp; Enter market indicators below</p>
+    </div>
+
+    <div class="form-group">
+      <label>SPX <span class="label-hint">— S&P 500 Index</span></label>
+      <input type="number" id="spx" placeholder="e.g. 4500.00" step="any"/>
+    </div>
+
+    <div class="form-group">
+      <label>USO <span class="label-hint">— Crude Oil ETF Price</span></label>
+      <input type="number" id="uso" placeholder="e.g. 72.50" step="any"/>
+    </div>
+
+    <div class="form-group">
+      <label>SLV <span class="label-hint">— Silver ETF Price</span></label>
+      <input type="number" id="slv" placeholder="e.g. 22.30" step="any"/>
+    </div>
+
+    <div class="form-group">
+      <label>EUR/USD <span class="label-hint">— Euro to Dollar Rate</span></label>
+      <input type="number" id="eurusd" placeholder="e.g. 1.0850" step="any"/>
+    </div>
+
+    <button class="btn" id="predictBtn" onclick="predict()">⚡ Predict Gold Price</button>
+
+    <div class="loading" id="loading">🔄 Running prediction...</div>
+
+    <div class="result-card" id="result">
+      <div class="label">Predicted Gold Price (GLD ETF)</div>
+      <div class="price" id="priceValue">—</div>
+      <div class="unit">USD per share</div>
+    </div>
+
+    <div class="error-card" id="error"></div>
+
+    <div class="features-info">
+      <div class="feature-badge"><span>Model</span>Random Forest</div>
+      <div class="feature-badge"><span>Tuning</span>GridSearchCV</div>
+      <div class="feature-badge"><span>Features</span>SPX, USO, SLV, EUR/USD</div>
+      <div class="feature-badge"><span>Target</span>GLD ETF Price</div>
+    </div>
+  </div>
+
+  <script>
+    // 🔧 CHANGE THIS to your deployed backend URL
+    const API_URL = "http://localhost:5000";
+
+    async function predict() {
+      const btn = document.getElementById("predictBtn");
+      const loading = document.getElementById("loading");
+      const resultCard = document.getElementById("result");
+      const errorCard = document.getElementById("error");
+
+      const spx    = document.getElementById("spx").value;
+      const uso    = document.getElementById("uso").value;
+      const slv    = document.getElementById("slv").value;
+      const eurusd = document.getElementById("eurusd").value;
+
+      if (!spx || !uso || !slv || !eurusd) {
+        errorCard.textContent = "⚠️ Please fill in all four fields.";
+        errorCard.style.display = "block";
+        resultCard.style.display = "none";
+        return;
+      }
+
+      btn.disabled = true;
+      loading.style.display = "block";
+      resultCard.style.display = "none";
+      errorCard.style.display = "none";
+
+      try {
+        const res = await fetch(`${API_URL}/predict`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ SPX: spx, USO: uso, SLV: slv, EUR_USD: eurusd })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Prediction failed");
+
+        document.getElementById("priceValue").textContent = `$${data.prediction}`;
+        resultCard.style.display = "block";
+      } catch (err) {
+        errorCard.textContent = `❌ ${err.message}`;
+        errorCard.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        loading.style.display = "none";
+      }
+    }
+
+    // Allow Enter key to trigger prediction
+    document.addEventListener("keydown", e => {
+      if (e.key === "Enter") predict();
+    });
+  </script>
+</body>
+</html>
