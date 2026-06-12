@@ -11,13 +11,17 @@ MODEL_PATH = os.path.join(os.path.dirname(__file__), "gold_price_model.pkl")
 
 try:
     model = pickle.load(open(MODEL_PATH, "rb"))
-except:
+    print("Model loaded successfully")
+except Exception as e:
     model = None
+    print(f"Model load error: {e}")
 
-@app.route("/api/predict", methods=["POST", "OPTIONS"])
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"status": "ok", "model_loaded": model is not None})
+
+@app.route("/predict", methods=["POST"])
 def predict():
-    if request.method == "OPTIONS":
-        return jsonify({}), 200
     if model is None:
         return jsonify({"error": "Model not loaded"}), 500
     try:
@@ -33,6 +37,6 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/api/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok", "model_loaded": model is not None})
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
